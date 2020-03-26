@@ -343,17 +343,17 @@ func (th *SearchTestHelper) createPost(userID, channelID, message, hashtags stri
 	return post, nil
 }
 
-func (th *SearchTestHelper) deleteUserPosts(userId string) error {
-	err := th.Store.Post().PermanentDeleteByUser(userId)
+func (th *SearchTestHelper) deleteUserPosts(userID string) error {
+	err := th.Store.Post().PermanentDeleteByUser(userID)
 	if err != nil {
 		return errors.New(err.Error())
 	}
 	return nil
 }
 
-func (th *SearchTestHelper) addUserToTeams(user *model.User, teamIds []string) error {
-	for _, teamId := range teamIds {
-		_, err := th.Store.Team().SaveMember(&model.TeamMember{TeamId: teamId, UserId: user.Id}, -1)
+func (th *SearchTestHelper) addUserToTeams(user *model.User, teamIDS []string) error {
+	for _, teamID := range teamIDS {
+		_, err := th.Store.Team().SaveMember(&model.TeamMember{TeamId: teamID, UserId: user.Id}, -1)
 		if err != nil {
 			return errors.New(err.Error())
 		}
@@ -362,12 +362,12 @@ func (th *SearchTestHelper) addUserToTeams(user *model.User, teamIds []string) e
 	return nil
 }
 
-func (th *SearchTestHelper) addUserToChannels(user *model.User, channelIds []string) ([]*model.ChannelMember, error) {
+func (th *SearchTestHelper) addUserToChannels(user *model.User, channelIDS []string) ([]*model.ChannelMember, error) {
 
-	channelMembers := make([]*model.ChannelMember, len(channelIds))
-	for _, channelId := range channelIds {
+	channelMembers := make([]*model.ChannelMember, len(channelIDS))
+	for _, channelID := range channelIDS {
 		cm, err := th.Store.Channel().SaveMember(&model.ChannelMember{
-			ChannelId:   channelId,
+			ChannelId:   channelID,
 			UserId:      user.Id,
 			NotifyProps: model.GetDefaultChannelNotifyProps(),
 		})
@@ -412,18 +412,18 @@ func (th *SearchTestHelper) assertUsersMatchInAnyOrder(t *testing.T, expected, a
 	}
 }
 
-func (th *SearchTestHelper) checkPostInSearchResults(t *testing.T, postId string, searchResults map[string]*model.Post) {
+func (th *SearchTestHelper) checkPostInSearchResults(t *testing.T, postID string, searchResults map[string]*model.Post) {
 	t.Helper()
-	postIds := make([]string, len(searchResults))
-	for id, _ := range searchResults {
-		postIds = append(postIds, id)
+	postIDS := make([]string, len(searchResults))
+	for ID, _ := range searchResults {
+		postIDS = append(postIDS, ID)
 	}
-	assert.Contains(t, postIds, postId, "Did not find expected post in search results.")
+	assert.Contains(t, postIDS, postID, "Did not find expected post in search results.")
 }
 
-func (th *SearchTestHelper) checkPostNotInSearchResults(t *testing.T, postId string, searchResults []string) {
+func (th *SearchTestHelper) checkPostNotInSearchResults(t *testing.T, postID string, searchResults []string) {
 	t.Helper()
-	assert.NotContains(t, searchResults, postId, "Found post in search results that should not be there.")
+	assert.NotContains(t, searchResults, postID, "Found post in search results that should not be there.")
 }
 
 func (th *SearchTestHelper) checkMatchesEqual(t *testing.T, expected model.PostSearchMatches, actual map[string][]string) {
@@ -431,8 +431,8 @@ func (th *SearchTestHelper) checkMatchesEqual(t *testing.T, expected model.PostS
 
 	a.Len(actual, len(expected), "Received matches for a different number of posts")
 
-	for postId, expectedMatches := range expected {
-		a.ElementsMatch(expectedMatches, actual[postId], fmt.Sprintf("%v: expected %v, got %v", postId, expectedMatches, actual[postId]))
+	for postID, expectedMatches := range expected {
+		a.ElementsMatch(expectedMatches, actual[postID], fmt.Sprintf("%v: expected %v, got %v", postID, expectedMatches, actual[postID]))
 	}
 }
 
