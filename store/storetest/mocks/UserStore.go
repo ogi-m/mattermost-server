@@ -269,6 +269,31 @@ func (_m *UserStore) GetAllAfter(limit int, afterId string) ([]*model.User, *mod
 	return r0, r1
 }
 
+// GetAllNotUsingAuthService provides a mock function with given fields:
+func (_m *UserStore) GetAllNotUsingAuthService() ([]*model.User, *model.AppError) {
+	ret := _m.Called()
+
+	var r0 []*model.User
+	if rf, ok := ret.Get(0).(func() []*model.User); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.User)
+		}
+	}
+
+	var r1 *model.AppError
+	if rf, ok := ret.Get(1).(func() *model.AppError); ok {
+		r1 = rf()
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*model.AppError)
+		}
+	}
+
+	return r0, r1
+}
+
 // GetAllProfiles provides a mock function with given fields: options
 func (_m *UserStore) GetAllProfiles(options *model.UserGetOptions) ([]*model.User, *model.AppError) {
 	ret := _m.Called(options)

@@ -970,6 +970,25 @@ func (us SqlUserStore) GetAllUsingAuthService(authService string) ([]*model.User
 	return users, nil
 }
 
+func (us SqlUserStore) GetAllNotUsingAuthService() ([]*model.User, *model.AppError) {
+	query := us.usersQuery.
+		Where("u.AuthService = ?", "").
+		Where("u.AuthService IS NULL").
+		OrderBy("u.Username ASC")
+
+	queryString, args, err := query.ToSql()
+	if err != nil {
+		return nil, model.NewAppError("SqlUserStore.GetAllNotUsingAuthService", "store.sql_user.app_error", nil, err.Error(), http.StatusInternalServerError)
+	}
+
+	var users []*model.User
+	if _, err := us.GetReplica().Select(&users, queryString, args...); err != nil {
+		return nil, model.NewAppError("SqlUserStore.GetAllUsingAuthService", "store.sql_user.get_by_auth.other.app_error", nil, "", http.StatusInternalServerError)
+	}
+
+	return users, nil
+}
+
 func (us SqlUserStore) GetByUsername(username string) (*model.User, *model.AppError) {
 	query := us.usersQuery.Where("u.Username = ?", username)
 
