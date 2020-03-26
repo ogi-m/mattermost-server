@@ -51,6 +51,7 @@ type WebSocketClient struct {
 	quitWriterChan chan struct{}
 	quitReaderChan chan struct{}
 	closeOnce      sync.Once
+	closed         bool
 }
 
 // NewWebSocketClient constructs a new WebSocket client with convenience
@@ -119,19 +120,23 @@ func (wsc *WebSocketClient) ConnectWithDialer(dialer *websocket.Dialer) *AppErro
 	}
 	// Super racy and should not be done anyways.
 	// All of this needs to be redesigned for v6.
-	if wsc.writeChan == nil {
+	if wsc.writeChan == nil || wsc.closed {
 		wsc.writeChan = make(chan writeMessage)
 		go wsc.writer()
 	}
-	if wsc.closePingWatchdog == nil {
+	if wsc.closePingWatchdog == nil || wsc.closed {
 		wsc.closePingWatchdog = make(chan struct{})
 		wsc.configurePingHandling()
 	}
-	if wsc.quitWriterChan == nil {
+	if wsc.quitWriterChan == nil || wsc.closed {
 		wsc.quitWriterChan = make(chan struct{})
 	}
-	if wsc.quitReaderChan == nil {
+	if wsc.quitReaderChan == nil || wsc.closed {
 		wsc.quitReaderChan = make(chan struct{})
+	}
+	if wsc.closed {
+		wsc.closeOnce = sync.Once{}
+		wsc.closed = false
 	}
 
 	wsc.EventChannel = make(chan *WebSocketEvent, 100)
@@ -169,6 +174,8 @@ func (wsc *WebSocketClient) Close() {
 		close(wsc.EventChannel)
 		close(wsc.ResponseChannel)
 		close(wsc.closePingWatchdog)
+
+		wsc.closed = true
 	})
 }
 
